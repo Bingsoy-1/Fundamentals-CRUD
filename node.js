@@ -1,49 +1,45 @@
-const taskInput = document.getElementById('taskInput');
-const addTaskBtn = document.getElementById('addTaskBtn');
-const taskTableBody = document.getElementById('taskTableBody');
-let tasks = [];
-let editIndex = null;
+document.addEventListener("DOMContentLoaded", () => {
+    const taskInput = document.getElementById("taskInput");
+    const addTaskBtn = document.getElementById("addTaskBtn");
+    const pendingTasks = document.getElementById("pendingTasks");
+    const completedTasks = document.getElementById("completedTasks");
+    
+    function createTaskRow(taskText) {
+        let row = document.createElement("tr");
+        row.innerHTML = `<td>${taskText}</td>
+                         <td>
+                            <button class="doneBtn">Done</button>
+                            <button class="pendingBtn" style="display:none;">Pending</button>
+                            <button class="removeBtn">Remove</button>
+                         </td>`;
 
-function renderTasks() {
-    taskTableBody.innerHTML = '';
-
-    tasks.forEach((task, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${task}</td>
-            <td>
-                <button class="edit" onclick="editTask(${index})">Edit</button>
-                <button class="delete" onclick="deleteTask(${index})">Delete</button>
-            </td>
-        `;
-        taskTableBody.appendChild(row);
-    });
-}
-
-function addTask() {
-    const taskText = taskInput.value.trim();
-
-    if (taskText === '') return;
-
-    if (editIndex !== null) {
-        tasks[editIndex] = taskText;
-        editIndex = null;
-    } else {
-        tasks.push(taskText);
+        const doneBtn = row.querySelector(".doneBtn");
+        const pendingBtn = row.querySelector(".pendingBtn");
+        
+        doneBtn.addEventListener("click", () => moveToCompleted(row, doneBtn, pendingBtn));
+        pendingBtn.addEventListener("click", () => moveToPending(row, doneBtn, pendingBtn));
+        row.querySelector(".removeBtn").addEventListener("click", () => row.remove());
+        
+        return row;A
     }
 
-    taskInput.value = '';
-    renderTasks();
-}
+    function moveToCompleted(row, doneBtn, pendingBtn) {
+        completedTasks.appendChild(row);
+        doneBtn.style.display = "none";
+        pendingBtn.style.display = "inline-block";
+    }
 
-function editTask(index) {
-    taskInput.value = tasks[index];
-    editIndex = index;
-}
+    function moveToPending(row, doneBtn, pendingBtn) {
+        pendingTasks.appendChild(row);
+        doneBtn.style.display = "inline-block";
+        pendingBtn.style.display = "none";
+    }
 
-function deleteTask(index) {
-    tasks.splice(index, 1);
-    renderTasks();
-}
-
-addTaskBtn.addEventListener('click', addTask);
+    addTaskBtn.addEventListener("click", () => {
+        let taskText = taskInput.value.trim();
+        if (!taskText) return;
+        
+        pendingTasks.appendChild(createTaskRow(taskText));
+        taskInput.value = "";
+    });
+});
